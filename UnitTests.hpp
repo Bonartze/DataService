@@ -1,7 +1,3 @@
-//
-// Created by ivan on 02.07.23.
-//
-
 #ifndef DATASERVICE_UNITTESTS_HPP
 #define DATASERVICE_UNITTESTS_HPP
 
@@ -14,7 +10,7 @@ class UnitTests {
 public:
     static void InitTests(int, char **);
 
-    UnitTests()=default;
+    UnitTests() = default;
 
     ~UnitTests() = default;
 

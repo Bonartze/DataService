@@ -1,7 +1,3 @@
-//
-// Created by ivan on 02.07.23.
-//
-
 #include "UnitTests.hpp"
 #include "ServerTest.hpp"
 

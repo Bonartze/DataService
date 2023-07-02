@@ -1,6 +1,3 @@
-//
-// Created by ivan on 01.07.23.
-//
 
 #ifndef DATASERVICE_SQLITEEXCEPTION_HPP
 #define DATASERVICE_SQLITEEXCEPTION_HPP
