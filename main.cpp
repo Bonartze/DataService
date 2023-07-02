@@ -4,8 +4,8 @@
 int main(int argc, char **argv) {
     {                                //unit testing of server handling
         UnitTests test;
-        test.init_tests(argc, argv);
-        test.run_tests();
+        test.InitTests(argc, argv);
+        test.RunTests();
 
     }
     {

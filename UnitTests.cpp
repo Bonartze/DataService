@@ -5,13 +5,13 @@
 #include "UnitTests.hpp"
 #include "ServerTest.hpp"
 
-void UnitTests::init_tests(int argc, char **argv) {
+void UnitTests::InitTests(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     testing::InitGoogleMock(&argc, argv);
 }
 
 
-int UnitTests::run_tests() {
+int UnitTests::RunTests() {
     return RUN_ALL_TESTS();
 }
 

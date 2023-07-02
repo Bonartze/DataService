@@ -22,7 +22,6 @@ public:
 
     std::string GetRequest();
 
-
 };
 
 

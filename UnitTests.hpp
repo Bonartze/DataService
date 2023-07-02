@@ -12,13 +12,13 @@
 
 class UnitTests {
 public:
-    static void init_tests(int, char **);
+    static void InitTests(int, char **);
 
     UnitTests()=default;
 
     ~UnitTests() = default;
 
-    int run_tests();
+    int RunTests();
 };
 
 
