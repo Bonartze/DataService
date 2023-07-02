@@ -20,13 +20,13 @@ using Tables = std::unordered_map<std::string, std::string>;
 
 class Server {
 private:
-    std::string name_data_base = "base.bd";
-    sqlite3 *data_base;
+    std::string NameDataBase = "base.bd";
+    sqlite3 *DataBase;
     std::vector<std::string> tables;
 
-    std::string parse_columns(std::string);
+    std::string ParseColumns(std::string);
 
-    std::string get_response(std::string, sqlite3_stmt *);
+    std::string GetResponse(std::string, sqlite3_stmt *);
 
 
 public:
@@ -34,18 +34,18 @@ public:
 
     ~Server();
 
-    std::string sort_by(std::string, std::string);
+    std::string SortBy(std::string, std::string);
 
-    std::string filtration_by(std::string, std::string);
+    std::string FiltrationBy(std::string, std::string);
 
-    void CreateTable(std::string);
+    bool CreateTable(std::string);
 
-    Tables columns_info();
+    Tables ColumnsInfo();
 
-    void RemoveAllTables();
+    bool RemoveAllTables();
 
 
-    void display(std::string);
+    void Display(std::string);
 
 };
 

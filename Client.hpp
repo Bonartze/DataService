@@ -7,27 +7,22 @@
 #include <sqlite3.h>
 #include "Server.hpp"
 #include <fstream>
+#include <limits>
 
 class Client {
 private:
     static Server *server;
-    bool is_registered = false;
-    bool is_online = false;
-    std::string login;
-    std::string password;
     std::string request;
-
-    void registration();
-
 public:
-    Client();
+    Client() = default;
+
     ~Client();
-    void clear_server();
-    std::string get_request();
 
-    inline void enter();
+    void ClearServer();
 
-    inline void leave();
+    std::string GetRequest();
+
+
 };
 
 

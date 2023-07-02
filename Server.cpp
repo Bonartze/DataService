@@ -1,7 +1,7 @@
 #include "Server.hpp"
 
 Server::Server() {
-    int rc = sqlite3_open(name_data_base.c_str(), &data_base);
+    int rc = sqlite3_open(NameDataBase.c_str(), &DataBase);
     if (rc != SQLITE_OK) {
         std::cerr << "Can't create data base\n";
         throw BadEdit("Failed creating data base\n");
@@ -9,35 +9,36 @@ Server::Server() {
 }
 
 Server::~Server() {
-    sqlite3_close(data_base);
+    sqlite3_close(DataBase);
 }
 
-void Server::RemoveAllTables() {
+bool Server::RemoveAllTables() {
     for (auto &table_name: tables) {
         std::string sql = "DROP TABLE IF EXISTS " + table_name + ";";
-        int rc = sqlite3_exec(data_base, sql.c_str(), nullptr, nullptr, nullptr);
+        int rc = sqlite3_exec(DataBase, sql.c_str(), nullptr, nullptr, nullptr);
         if (rc != SQLITE_OK) {
-            std::cerr << "Failed to drop table: " << sqlite3_errmsg(data_base) << std::endl;
+            std::cerr << "Failed to drop table: " << sqlite3_errmsg(DataBase) << std::endl;
             throw BadDrop{"Failed to drop table\n "};
         }
     }
+    return true;
 }
 
-std::string Server::filtration_by(std::string filter, std::string table_name) {
+std::string Server::FiltrationBy(std::string filter, std::string table_name) {
     std::string filtrate_table;
     sqlite3_stmt *statement;
     std::string query = "SELECT * FROM " + table_name + " WHERE " + filter;
-    int rc = sqlite3_prepare_v2(data_base, query.c_str(), -1, &statement, 0);
+    int rc = sqlite3_prepare_v2(DataBase, query.c_str(), -1, &statement, 0);
     if (rc != SQLITE_OK) {
         std::cout << "Failed to prepare SQL-query\n";
         throw BadPrepare{"Failed to prepare SQL-query\n"};
     }
-    return get_response(query, statement);
+    return GetResponse(query, statement);
 }
 
-std::string Server::get_response(std::string query, sqlite3_stmt *statement) {
+std::string Server::GetResponse(std::string query, sqlite3_stmt *statement) {
     std::string res_table;
-    int rc = sqlite3_prepare_v2(data_base, query.c_str(), -1, &statement, 0);
+    int rc = sqlite3_prepare_v2(DataBase, query.c_str(), -1, &statement, 0);
     if (rc == SQLITE_OK) {
         int columnCount = sqlite3_column_count(statement);
         std::vector<std::string> columnNames;
@@ -84,20 +85,19 @@ std::string Server::get_response(std::string query, sqlite3_stmt *statement) {
             res_table += "\n";
         }
     } else {
-        std::cerr << "Failed to execute the query: " << sqlite3_errmsg(data_base) << std::endl;
+        std::cerr << "Failed to execute the query: " << sqlite3_errmsg(DataBase) << std::endl;
         // add exception
     }
     return res_table;
 }
 
-std::string Server::sort_by(std::string sort_by, std::string table_name) {
-    std::string sorted_table;
+std::string Server::SortBy(std::string sort_by, std::string table_name) {
     sqlite3_stmt *statement;
     std::string query = "SELECT * FROM " + table_name + " ORDER BY " + sort_by;
-    return get_response(query, statement);
+    return GetResponse(query, statement);
 }
 
-std::string Server::parse_columns(std::string p) {
+std::string Server::ParseColumns(std::string p) {
     std::stringstream ss{p};
     std::string word;
     std::string tmp = "";
@@ -109,15 +109,15 @@ std::string Server::parse_columns(std::string p) {
     return tmp;
 }
 
-Tables Server::columns_info() {
+Tables Server::ColumnsInfo() {
     Tables col_info;
     for (auto &table_name: tables) {
         std::stringstream ss;
         std::string query = "PRAGMA table_info(" + table_name + ");";
         sqlite3_stmt *stmt;
-        int rc = sqlite3_prepare_v2(data_base, query.c_str(), -1, &stmt, nullptr);
+        int rc = sqlite3_prepare_v2(DataBase, query.c_str(), -1, &stmt, nullptr);
         if (rc != SQLITE_OK) {
-            std::cerr << "Failed to prepare SQL statement: " << sqlite3_errmsg(data_base) << std::endl;
+            std::cerr << "Failed to prepare SQL statement: " << sqlite3_errmsg(DataBase) << std::endl;
             throw BadPrepare("Failed to prepare SQL statement\n");
         }
         ss << "Column names: ";
@@ -132,7 +132,7 @@ Tables Server::columns_info() {
     return col_info;
 }
 
-void Server::CreateTable(std::string file_name) {          //creating a table, file's name is table's name
+bool Server::CreateTable(std::string file_name) {          //creating a table, file's name is table's name
     tables.push_back(file_name);
     std::fstream data_file(file_name);
     if (!data_file) {
@@ -141,28 +141,29 @@ void Server::CreateTable(std::string file_name) {          //creating a table, f
     }
     std::string columns;
     getline(data_file, columns);  //getting columns in file
-    std::string tmp = parse_columns(columns);
+    std::string tmp = ParseColumns(columns);
     auto temp = "CREATE TABLE IF NOT EXISTS " + file_name + " (" + tmp + ");";
-    int rc = sqlite3_exec(data_base, temp.c_str(), nullptr, nullptr, nullptr);
+    int rc = sqlite3_exec(DataBase, temp.c_str(), nullptr, nullptr, nullptr);
     if (rc != SQLITE_OK) {
-        std::cerr << "Failed to insert data into users table: " << sqlite3_errmsg(data_base) << std::endl;
+        std::cerr << "Failed to insert data into users table: " << sqlite3_errmsg(DataBase) << std::endl;
         throw BadEdit("Failed to insert data into users table");
     }
     std::string fileLine;    // copy table from file to sql table
     while (getline(data_file, fileLine)) {
-        fileLine = parse_columns(fileLine);
+        fileLine = ParseColumns(fileLine);
         std::string sql_req = "INSERT INTO " + file_name + " (" + tmp + ") VALUES " + "(" + fileLine + ")";
         char *err_msg;
-        rc = sqlite3_exec(data_base, sql_req.c_str(), nullptr, nullptr, nullptr);
+        rc = sqlite3_exec(DataBase, sql_req.c_str(), nullptr, nullptr, nullptr);
         if (rc != SQLITE_OK) {
-            std::cerr << "Can't insert into table: " << sqlite3_errmsg(data_base) << std::endl;
+            std::cerr << "Can't insert into table: " << sqlite3_errmsg(DataBase) << std::endl;
             throw BadEdit("Failed insert into tabl\ne");
         }
     }
+    return true;
 }
 
-void Server::display(std::string name_table) {
-    int rc = sqlite3_open(name_data_base.c_str(), &data_base);
+void Server::Display(std::string name_table) {
+    int rc = sqlite3_open(NameDataBase.c_str(), &DataBase);
     if (rc != SQLITE_OK) {
         std::cerr << "Can't open database\n";
         throw BadEdit("Failed open data base\n");
@@ -170,9 +171,9 @@ void Server::display(std::string name_table) {
 
     sqlite3_stmt *stmt;
     std::string sql = "SELECT * FROM " + name_table + ";";
-    rc = sqlite3_prepare_v2(data_base, sql.c_str(), -1, &stmt, 0);
+    rc = sqlite3_prepare_v2(DataBase, sql.c_str(), -1, &stmt, 0);
     if (rc != SQLITE_OK) {
-        std::cerr << "Can't prepare SQL statement: " << sqlite3_errmsg(data_base) << std::endl;
+        std::cerr << "Can't prepare SQL statement: " << sqlite3_errmsg(DataBase) << std::endl;
         throw BadPrepare("Failed prepare SQL statement");
     }
     // Getting info about columns

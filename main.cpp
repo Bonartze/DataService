@@ -1,15 +1,19 @@
-#include <iostream>
+#include "UnitTests.hpp"
 #include "Client.hpp"
 
-int main() {
+int main(int argc, char **argv) {
+    {                                //unit testing of server handling
+        UnitTests test;
+        test.init_tests(argc, argv);
+        test.run_tests();
+
+    }
     {
         Client c;
-        c.get_request();
-        c.get_request();
-        auto t = c.get_request();
-        std::cout << t << std::endl;
+        c.GetRequest();
+        auto t = c.GetRequest();
+        c.ClearServer();
+        std::cout << t;
     }
-
     return 0;
 }
-
